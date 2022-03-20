@@ -6,6 +6,7 @@
     "repository": {
         "url": "https://github.com/MS-AZ/collab"
     },
+    "publisher": "ms-az",
     "engines": {
         "vscode": "^1.65.0"
     },
