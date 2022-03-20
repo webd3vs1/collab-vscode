@@ -6,4 +6,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/ms-az/collab-vscode-extension/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/ms-az/collab-vscode-extension/v0.0.1

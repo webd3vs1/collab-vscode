@@ -1,7 +1,0 @@
-TODO:
-    ☐ work on `src/fs.ts`
-    rework api (websocket): @important
-        ✔ requests @started(22-01-17 22:55) @done(22-01-17 22:55) @lasted(26s)
-        ☐ ...
-        ✔ add POST, PUT, DELETE methods in `src/api.ts` @done(22-01-03 12:16)
-        ✔ remove unused contributions in `package.json` @done(22-01-03 12:17)
