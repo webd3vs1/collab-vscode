@@ -17,13 +17,13 @@ class Api {
         this.host = "";
         this.auth = "";
         this.listeners = [];
-        this.onopen = (e) => {
+        this.onopen = (_e) => {
             console.log("Websocket open");
         };
-        this.onerror = (e) => {
+        this.onerror = (_e) => {
             console.log("Websocket error happened");
         };
-        this.onclose = (e) => {
+        this.onclose = (_e) => {
             console.log("Websocket closed");
         }
         this.onmessage = (e:MessageEvent) => {
@@ -97,7 +97,7 @@ class Api {
         });
     }
 
-    createDirectory(path: string): Promise<void> {
+    createDirectory(_path: string): Promise<void> {
         return new Promise(() => {});
     }
 
@@ -137,7 +137,7 @@ class Api {
         });
     }
 
-    delete(path: string, options: { recursive: boolean }): Promise<void> {
+    delete(_path: string, _options: { recursive: boolean }): Promise<void> {
         return new Promise(() => {});
     }
 

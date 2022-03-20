@@ -32,7 +32,7 @@ export default class CollabFs implements vscode.FileSystemProvider {
         if (data.error) throw vscode.FileSystemError.FileNotFound(uri);
         return Uint8Array.from(data);
     }
-    async rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean; }): Promise<void> {
+    async rename(oldUri: vscode.Uri, newUri: vscode.Uri, _options: { overwrite: boolean; }): Promise<void> {
         let oldPath = `/${oldUri.toString(true).split("/").slice(1).join("/")}`;
         let newPath = `/${newUri.toString(true).split("/").slice(1).join("/")}`;
         console.log("rename", oldPath, newPath);
@@ -76,10 +76,9 @@ export default class CollabFs implements vscode.FileSystemProvider {
 
 
 
-    watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
+    watch(_uri: vscode.Uri, _options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
         return { dispose: () => {} }
     }
-    copy(source: vscode.Uri, destination: vscode.Uri, options: { overwrite: boolean }): void {
-
+    copy(_source: vscode.Uri, _destination: vscode.Uri, _options: { overwrite: boolean }): void {
     }
 }

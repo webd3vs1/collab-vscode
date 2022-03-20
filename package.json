@@ -1,8 +1,11 @@
 {
     "name": "collab",
     "displayName": "collab",
-    "description": "",
-    "version": "0.0.1",
+    "description": "remotely work on a project at anytime",
+    "version": "0.0.3",
+    "repository": {
+        "url": "https://github.com/MS-AZ/collab"
+    },
     "engines": {
         "vscode": "^1.65.0"
     },

@@ -24,9 +24,9 @@ function listen(): Promise<Server> {
 }
 
 export function login(): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-        // let url = "collab-ext-server.herokuapp.com/";
-        let url = "localhost:3000";
+    return new Promise(async resolve => {
+        let url = "collab-ext-server.herokuapp.com/";
+        // let url = "localhost:3000";
         let secure = ""; //"s"
         let server = await listen();
         once(events, "token").then(async ([value]) => {
