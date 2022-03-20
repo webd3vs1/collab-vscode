@@ -3,3 +3,7 @@ dist
 node_modules
 .vscode-test/
 *.vsix
+todo.todo
+.eslintrc.json
+tsconfig.json
+.vscodeignore

@@ -10,7 +10,8 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:collab.load"
+        "onCommand:collab.load",
+        "onFileSystem:collab"
     ],
     "main": "./out/extension.js",
     "contributes": {

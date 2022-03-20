@@ -1,87 +1,140 @@
 import idm from "./idm";
 import { WebSocket, Event, MessageEvent, CloseEvent, ErrorEvent } from "ws";
-import { resolve } from "path";
-
 
 class Api {
-    private socket: WebSocket | null = null;
-    private host: string = "";
-    private auth: string = "";
-    private listeners: (()=>any)[] = [];
+    private socket: WebSocket | null;
+    private host: string;
+    private auth: string;
+    public listeners: ((data:any)=>any)[];
+    public onopen: (e:Event)=>any;
+    public onerror: (e:ErrorEvent)=>any
+    public onclose: (e:CloseEvent)=>any;
+    private onmessage: (e:MessageEvent)=>any;
+    public onfilechange: (e:any)=>any;
 
-    login(host: string, token: string, onopen: () => any, onerror: () => any): void {
+    constructor() {
+        this.socket = null;
+        this.host = "";
+        this.auth = "";
+        this.listeners = [];
+        this.onopen = (e) => {
+            console.log("Websocket open");
+        };
+        this.onerror = (e) => {
+            console.log("Websocket error happened");
+        };
+        this.onclose = (e) => {
+            console.log("Websocket closed");
+        }
+        this.onmessage = (e:MessageEvent) => {
+            try {
+                let data = JSON.parse(<string>e.data);
+                if (data.id) {
+                    this.listeners[data?.id]?.(data);
+                } else {
+                    this.onfilechange(data);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        this.onfilechange = () => {};
+    }
+
+    login(host: string, token: string): void {
         this.host = host.replace(/(\/|\\)+$/, "")+"/";
         this.auth = token;
         this.socket = new WebSocket(this.host, {
             auth: this.auth
         });
-        this.socket.onopen = onopen ?? this.onopen;
+
+        this.socket.onopen = this.onopen;
         this.socket.onclose = this.onclose;
-        this.socket.onerror = onerror ?? this.onerror;
+        this.socket.onerror = this.onerror;
         this.socket.onmessage = this.onmessage;
     }
 
-    private onopen(e: Event) {
-        console.log(e);
-    }
-
-    private onclose(e: CloseEvent) {
-        console.log(e);
-    }
-
-    private onmessage(e: MessageEvent) {
-        console.log(e);
-        // this.listeners?.[e.data?.id]
-    }
-
-    private onerror(e: ErrorEvent) {
-        console.log(e);
-    }
-
-    private send(obj: { type: string, id: number, data?: any }) {
+    private send(obj: {
+        type: "deleteToken" | "readDirectory" | "stat" | "readFile" | "writeFile" | "rename",
+        id: number, data?: any
+    }) {
         if(this.socket && this.socket.readyState == this.socket.OPEN) {
-            this.socket.send(obj);
+            this.socket.send(JSON.stringify(obj));
         }
     }
 
-    private await(id: number, callback: () => any) {
+    private await(id: number, callback: (message:any) => any) {
         this.listeners[id] = callback;
     }
 
     deleteToken(): Promise<void> {
         return new Promise(async resolve => {
             let id = idm.grantID();
-            this.await(id, () => {
-                resolve();
-            });
-            this.send({ type: "deleteToken", id });
+            this.send({ type: "deleteToken", id, data: this.auth });
+            resolve();
         });
     }
 
     readDirectory(path: string): Promise<[string, number][]> {
-        return new Promise(() => {
+        return new Promise(resolve => {
             let id = idm.grantID();
-            this.await(id, () => {
-                resolve();
+            this.await(id, message => {
+                idm.revokeID(id);
+                resolve(message.data);
             });
-            this.send({ type: "readDirectory", id, data: path })
+            this.send({ type: "readDirectory", id, data: path });
         });
     }
-    
+
+    rename(path0: string, path1: string): Promise<any> {
+        return new Promise(resolve => {
+            let id = idm.grantID();
+            this.await(id, message => {
+                idm.revokeID(id);
+                resolve(message.data);
+            });
+            this.send({ type: "rename", id, data: [path0, path1] });
+        });
+    }
+
     createDirectory(path: string): Promise<void> {
         return new Promise(() => {});
     }
 
     stat(path: string): Promise<any> {
-        return new Promise(() => {});
+        return new Promise(resolve => {
+            let id = idm.grantID();
+            this.await(id, message => {
+                idm.revokeID(id);
+                resolve(message.data);
+            });
+            this.send({ type: "stat", id, data: path });
+        });
     }
 
     writeFile(path: string, content: number[], options: { create?: boolean, overwrite?: boolean }): Promise<void> {
-        return new Promise(() => {});
+        return new Promise(resolve => {
+            let id = idm.grantID();
+            this.await(id, message => {
+                idm.revokeID(id);
+                resolve(message.data);
+            });
+            this.send({
+                type: "writeFile", id,
+                data: { path, content, options }
+            });
+        });
     }
 
-    readFile(path: string): Promise<{ content: number[] }> {
-        return new Promise(() => {});
+    readFile(path: string): Promise<number[]|any> {
+        return new Promise(resolve => {
+            let id = idm.grantID();
+            this.await(id, message => {
+                idm.revokeID(id);
+                resolve(message.data);
+            });
+            this.send({ type: "readFile", id, data: path });
+        });
     }
 
     delete(path: string, options: { recursive: boolean }): Promise<void> {

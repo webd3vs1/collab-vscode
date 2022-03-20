@@ -1,5 +1,5 @@
 class IDManager {
-    private IDs: boolean[] = [];
+    private IDs: boolean[] = [false];
     private revoked: number[] = [];
 
     grantID(): number {

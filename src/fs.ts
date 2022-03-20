@@ -3,57 +3,67 @@ import api from "./api";
 
 export default class CollabFs implements vscode.FileSystemProvider {
     emitter: vscode.EventEmitter<vscode.FileChangeEvent[]>;
-    onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]>;
-    openedProject: string;
+    readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]>;
 
-    constructor(emitter: vscode.EventEmitter<vscode.FileChangeEvent[]>, project: string) {
-        this.emitter = emitter;
+    constructor() {
+        this.emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
         this.onDidChangeFile = this.emitter.event;
-        this.openedProject = project;
+        api.onfilechange = (change) => {
+            if (!(["change", "create", "delete"].includes(change.type))) return;
+            let event = {
+                type: 
+                    change.type == "change" ? vscode.FileChangeType.Changed :
+                    change.type == "create" ? vscode.FileChangeType.Created :
+                    change.type == "delete" ? vscode.FileChangeType.Deleted : 0,
+                    uri: change.data
+            };
+            this.emitter.fire([event]);
+        }
     }
     async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
-        let path = uri.toString(true).split("/").slice(1).join("/");
+        let path = `/${uri.toString(true).split("/").slice(1).join("/")}`;
+        console.log("readDirectory", path);
         return await api.readDirectory(path);
-        //* todo test
     }
     async readFile(uri: vscode.Uri): Promise<Uint8Array> {
-        let path = uri.toString(true).split("/").slice(1).join("/");
-        let { content } = await api.readFile(path);
-        if (!content) throw vscode.FileSystemError.FileNotFound(uri);
-        return Uint8Array.from(content);
-        //* todo test
+        let path = `/${uri.toString(true).split("/").slice(1).join("/")}`;
+        console.log("readFile", path);
+        let data = await api.readFile(path);
+        if (data.error) throw vscode.FileSystemError.FileNotFound(uri);
+        return Uint8Array.from(data);
     }
-    rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean; }): void | Thenable<void> {
-        
-        //? todo end this?
-
+    async rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean; }): Promise<void> {
+        let oldPath = `/${oldUri.toString(true).split("/").slice(1).join("/")}`;
+        let newPath = `/${newUri.toString(true).split("/").slice(1).join("/")}`;
+        console.log("rename", oldPath, newPath);
+        await api.rename(oldPath, newPath);
+        return;
     }
     async delete(uri: vscode.Uri, options: { recursive: boolean; }): Promise<void> {
-        let path = uri.toString(true).split("/").slice(1).join("/");
+        let path = `/${uri.toString(true).split("/").slice(1).join("/")}`;
+        console.log("delete", path);
         await api.delete(path, options);
         return;
         //* todo test
-
     }
     async createDirectory(uri: vscode.Uri): Promise<void> {
-        let path = uri.toString(true).split("/").slice(1).join("/");
+        let path = `/${uri.toString(true).split("/").slice(1).join("/")}`;
+        console.log("createDirectory", path);
         await api.createDirectory(path);
         return;
         //* todo test
     }
 
     async writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): Promise<void> {
-        let path = uri.toString(true).split("/").slice(1).join("/");
+        let path = `/${uri.toString(true).split("/").slice(1).join("/")}`;
         await api.writeFile(path, Array.from(content), options);
         return;
-        //* todo test
-
     }
     async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
-        let path = uri.toString(true).split("/").slice(1).join("/");
-        let stat = await api.stat(path).catch(err => {
-            throw vscode.FileSystemError.FileNotFound(uri);
-        });
+        let path = `/${uri.toString(true).split("/").slice(1).join("/")}`;
+        console.log("stat", path);
+        let stat = await api.stat(path);
+        if (stat?.error) throw vscode.FileSystemError.FileNotFound(uri);
         return {
             size: stat?.size,
             ctime: stat?.ctime,
@@ -67,7 +77,6 @@ export default class CollabFs implements vscode.FileSystemProvider {
 
 
     watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
-        console.log(uri.toString(true));
         return { dispose: () => {} }
     }
     copy(source: vscode.Uri, destination: vscode.Uri, options: { overwrite: boolean }): void {

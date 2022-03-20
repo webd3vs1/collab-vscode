@@ -31,7 +31,10 @@ export function login(): Promise<void> {
         let server = await listen();
         once(events, "token").then(async ([value]) => {
             server.close();
-            api.login(`ws${secure}://${url}/ws`, value?.token, resolve, reject);
+            api.onopen = () => {
+                resolve();
+            }
+            api.login(`ws${secure}://${url}/ws`, value?.token);
         });
         vscode.env.openExternal(vscode.Uri.parse(`http${secure}://${url}`));
     });
