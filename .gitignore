@@ -1,9 +1,7 @@
-out
-dist
-node_modules
-.vscode-test/
-todo.todo
+out/
+dist/
+node_modules/
 package-lock.json
+.vscodeignore
 .eslintrc.json
 tsconfig.json
-.vscodeignore
