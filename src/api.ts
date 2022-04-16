@@ -1,13 +1,15 @@
 import idm from "./idm";
 import { WebSocket, Event, MessageEvent, CloseEvent, ErrorEvent } from "ws";
+import axios from "axios";
 
 class Api {
     private socket: WebSocket | null;
     private host: string;
     private auth: string;
+    private ping: NodeJS.Timeout | null;
     public listeners: ((data:any)=>any)[];
     public onopen: (e:Event)=>any;
-    public onerror: (e:ErrorEvent)=>any
+    public onerror: (e:ErrorEvent)=>any;
     public onclose: (e:CloseEvent)=>any;
     private onmessage: (e:MessageEvent)=>any;
     public onfilechange: (e:any)=>any;
@@ -16,21 +18,23 @@ class Api {
         this.socket = null;
         this.host = "";
         this.auth = "";
+        this.ping = null;
         this.listeners = [];
         this.onopen = (_e) => {
             console.log("Websocket open");
         };
-        this.onerror = (_e) => {
-            console.log("Websocket error happened");
+        this.onerror = (e) => {
+            console.log("Websocket error happened:", e);
         };
-        this.onclose = (_e) => {
-            console.log("Websocket closed");
+        this.onclose = (e) => {
+            console.log("Websocket closed:", e);
         }
         this.onmessage = (e:MessageEvent) => {
             try {
                 let data = JSON.parse(<string>e.data);
                 if (data.id) {
                     this.listeners[data?.id]?.(data);
+                    delete this.listeners[data?.id];
                 } else {
                     this.onfilechange(data);
                 }
@@ -41,21 +45,41 @@ class Api {
         this.onfilechange = () => {};
     }
 
-    login(host: string, token: string): void {
-        this.host = host.replace(/(\/|\\)+$/, "")+"/";
-        this.auth = token;
-        this.socket = new WebSocket(this.host, {
-            auth: this.auth
-        });
+    connect(): Promise<void> {
+        return new Promise(resolve => {
 
-        this.socket.onopen = this.onopen;
-        this.socket.onclose = this.onclose;
-        this.socket.onerror = this.onerror;
-        this.socket.onmessage = this.onmessage;
+            this.socket = new WebSocket("wss://" + this.host + "/ws", {
+                auth: this.auth
+            });
+
+            this.socket.onopen = this.onopen;
+            this.socket.onclose = this.onclose;
+            this.socket.onerror = this.onerror;
+            this.socket.onmessage = this.onmessage;
+
+            this.ping = setInterval(() => {
+                let id = idm.grantID();
+                this.await(id, _ => {
+                    idm.revokeID(id);
+                    console.log("pong: "+id)
+                });
+                this.send({ type: "ping", id });
+                console.log("ping: "+id);
+            }, 5000);
+            setTimeout(() => {
+                resolve();
+            }, 7500);
+        });
+    }
+
+    async validateToken(token: string): Promise<boolean> {
+        let res = await axios.get("https://" + this.host + "/token", { headers: { Authorization: token } }).catch(() => {});
+        if (res?.status == 200) return true;
+        else return false;
     }
 
     private send(obj: {
-        type: "deleteToken" | "readDirectory" | "stat" | "readFile" | "writeFile" | "rename",
+        type: "readDirectory" | "stat" | "ping" | "readFile" | "writeFile" | "rename",
         id: number, data?: any
     }) {
         if(this.socket && this.socket.readyState == this.socket.OPEN) {
@@ -63,16 +87,8 @@ class Api {
         }
     }
 
-    private await(id: number, callback: (message:any) => any) {
+    private await(id: number, callback: (message: any) => any) {
         this.listeners[id] = callback;
-    }
-
-    deleteToken(): Promise<void> {
-        return new Promise(async resolve => {
-            let id = idm.grantID();
-            this.send({ type: "deleteToken", id, data: this.auth });
-            resolve();
-        });
     }
 
     readDirectory(path: string): Promise<[string, number][]> {
@@ -80,6 +96,7 @@ class Api {
             let id = idm.grantID();
             this.await(id, message => {
                 idm.revokeID(id);
+                console.log(message.data)
                 resolve(message.data);
             });
             this.send({ type: "readDirectory", id, data: path });
@@ -139,6 +156,16 @@ class Api {
 
     delete(_path: string, _options: { recursive: boolean }): Promise<void> {
         return new Promise(() => {});
+    }
+
+    set url(host: string) {
+        this.host = host.replace(/(\/|\\)+$/, "");
+    }
+    set token(auth: string) {
+        this.auth = auth;
+    }
+    get url() {
+        return this.host;
     }
 
 }

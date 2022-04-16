@@ -2,7 +2,7 @@
     "name": "collab",
     "displayName": "collab",
     "description": "remotely work on a project at anytime",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "repository": {
         "url": "https://github.com/MS-AZ/collab"
     },
@@ -15,6 +15,7 @@
     ],
     "activationEvents": [
         "onCommand:collab.load",
+        "onCommand:collab.decorate",
         "onFileSystem:collab"
     ],
     "main": "./out/extension.js",
@@ -23,6 +24,9 @@
             {
                 "command": "collab.load",
                 "title": "Load collaboration"
+            },{
+                "command": "collab.decorate",
+                "title": "Collab: Decorate"
             }
         ]
     },

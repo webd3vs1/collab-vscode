@@ -14,7 +14,7 @@ function listen(): Promise<Server> {
         app.use(cors());
         app.post("/", (q, s) => {
             s.status(200);
-            events.emit("token", { token: q.body.token });
+            events.emit("token", q.body.token);
             s.json({ status: 200, message: "OK", token: q.body.token });
         });
         let server = app.listen(54732, () => {
@@ -23,19 +23,13 @@ function listen(): Promise<Server> {
     })
 }
 
-export function login(): Promise<void> {
+export function login(url: string): Promise<string> {
     return new Promise(async resolve => {
-        let url = "collab-ext-server.herokuapp.com";
-        // let url = "localhost:3000";
-        let secure = ""; //"s"
         let server = await listen();
         once(events, "token").then(async ([value]) => {
             server.close();
-            api.onopen = () => {
-                resolve();
-            }
-            api.login(`ws${secure}://${url}/ws`, value?.token);
+            resolve(value);
         });
-        vscode.env.openExternal(vscode.Uri.parse(`http${secure}://${url}`));
+        vscode.env.openExternal(vscode.Uri.parse(url));
     });
 }
