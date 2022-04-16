@@ -2,7 +2,6 @@ out
 dist
 node_modules
 .vscode-test/
-release/
 todo.todo
 package-lock.json
 .eslintrc.json
