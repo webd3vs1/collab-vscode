@@ -1,38 +1,33 @@
 # Collab extension
 <br>
 
-## ` \/ Last Updates \/ `
+## Changelog
+###### [full changelog][changelog]
 <br>
 
-```md
-# 0.0.3
+> ### [__v0.0.3-alpha__][0.0.3]
+> > #### __Changed__
+> > - API: HyperText Transfer Protocol -> WebSocket
+>
+> > #### __Removed__
+> > - Explorer View
+>
+> > #### __Added__
+> > - Login with Discord
+> > - Remote filesystem
+> > - Multi-root workspace
 
-<changed>
-> API: HyperText Transfer Protocol -> WebSocket
+> ### [__v0.0.2-alpha__][0.0.2]
+> > #### __Changed__
+> > - API endpoints
+> > - Language detection
+>
+> > #### __Added__
+> > - API library
+> > - Icon rendering
 
-<removed>
-> Explorer View
 
-<added>
-> login with Discord
-> remote filesystem
-> multi-root workspace
-```
 
-```md
-# 0.0.2
-
-<changed>
-> API endpoints
-> language detection
-
-<added>
-> API library
-> project element
-> icon rendering
-```
-```md
-# 0.0.1
-
-> Initial release
-```
+[0.0.3]: https://github.com/webd3vs1/collab-vscode-extension/tree/v0.0.3-alpha
+[0.0.2]: https://github.com/webd3vs1/collab-vscode-extension/tree/v0.0.2-alpha
+[changelog]: https://github.com/webd3vs1/collab-vscode-extension/blob/master/CHANGELOG.md
