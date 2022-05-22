@@ -2,9 +2,9 @@
     "name": "collab",
     "displayName": "collab",
     "description": "remotely work on a project at anytime",
-    "version": "0.0.4",
+    "version": "0.0.3",
     "repository": {
-        "url": "https://github.com/MS-AZ/collab"
+        "url": "https://github.com/webd3vs1/collab-vscode-extension"
     },
     "publisher": "ms-az",
     "engines": {
