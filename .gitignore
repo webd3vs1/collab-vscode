@@ -1,7 +1,5 @@
 out/
-dist/
+release/
 node_modules/
-package-lock.json
-.vscodeignore
 .eslintrc.json
-tsconfig.json
+pnpm-lock.yaml

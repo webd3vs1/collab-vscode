@@ -2,7 +2,7 @@
     "name": "collab",
     "displayName": "collab",
     "description": "remotely work on a project at anytime",
-    "version": "0.0.3",
+    "version": "1.0.0-alpha",
     "repository": {
         "url": "https://github.com/webd3vs1/collab-vscode-extension"
     },
@@ -22,9 +22,10 @@
     "contributes": {
         "commands": [
             {
-                "command": "collab.load",
-                "title": "Load collaboration"
-            },{
+                "command": "collab.login",
+                "title": "Login to collab"
+            },
+            {
                 "command": "collab.decorate",
                 "title": "Collab: Decorate"
             }
@@ -58,6 +59,7 @@
         "axios": "^0.26.1",
         "cors": "^2.8.5",
         "express": "^4.17.3",
+        "socket.io-client": "^4.5.1",
         "ws": "^8.5.0"
     }
 }

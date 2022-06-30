@@ -1,172 +1,98 @@
-import idm from "./idm";
-import { WebSocket, Event, MessageEvent, CloseEvent, ErrorEvent } from "ws";
 import axios from "axios";
+import { io, Socket } from "socket.io-client";
+import { resolve } from "path";
 
 class Api {
-    private socket: WebSocket | null;
-    private host: string;
-    private auth: string;
-    private ping: NodeJS.Timeout | null;
-    public listeners: ((data:any)=>any)[];
-    public onopen: (e:Event)=>any;
-    public onerror: (e:ErrorEvent)=>any;
-    public onclose: (e:CloseEvent)=>any;
-    private onmessage: (e:MessageEvent)=>any;
-    public onfilechange: (e:any)=>any;
+	private socket: Socket | null;
+	private host: string;
+	public token: string;
 
-    constructor() {
-        this.socket = null;
-        this.host = "";
-        this.auth = "";
-        this.ping = null;
-        this.listeners = [];
-        this.onopen = (_e) => {
-            console.log("Websocket open");
-        };
-        this.onerror = (e) => {
-            console.log("Websocket error happened:", e);
-        };
-        this.onclose = (e) => {
-            console.log("Websocket closed:", e);
-        }
-        this.onmessage = (e:MessageEvent) => {
-            try {
-                let data = JSON.parse(<string>e.data);
-                if (data.id) {
-                    this.listeners[data?.id]?.(data);
-                    delete this.listeners[data?.id];
-                } else {
-                    this.onfilechange(data);
-                }
-            } catch (e) {
-                console.log(e);
-            }
-        }
-        this.onfilechange = () => {};
-    }
+	constructor() {
+		this.socket = null;
+		this.host = "";
+		this.token = "";
+	}
 
-    connect(): Promise<void> {
-        return new Promise(resolve => {
+	connect(): void {
+		this.socket = io("https://" + this.host + "/user", {
+			auth: { token: this.token }
+		});
+	}
 
-            this.socket = new WebSocket("wss://" + this.host + "/ws", {
-                auth: this.auth
-            });
+	async validateToken(token: string): Promise<boolean> {
+		let res = await axios.get("https://" + this.host + "/token", {
+			headers: { Authorization: token }
+		}).catch(() => {});
+		if (res?.status == 200) return true;
+		else return false;
+	}
 
-            this.socket.onopen = this.onopen;
-            this.socket.onclose = this.onclose;
-            this.socket.onerror = this.onerror;
-            this.socket.onmessage = this.onmessage;
+	readDirectory(path: string): Promise<[string, number][]> {
+		return new Promise(resolve => {
+			this.socket?.emit("readDirectory", path,
+				(data: [string, number][]
+			) => {
+				resolve(data);
+			});
+		});
+	}
 
-            this.ping = setInterval(() => {
-                let id = idm.grantID();
-                this.await(id, _ => {
-                    idm.revokeID(id);
-                    console.log("pong: "+id)
-                });
-                this.send({ type: "ping", id });
-                console.log("ping: "+id);
-            }, 5000);
-            setTimeout(() => {
-                resolve();
-            }, 7500);
-        });
-    }
+	rename(path0: string, path1: string): Promise<any> {
+		return new Promise(resolve => {
+			this.socket?.emit("rename", path0, path1, (data: any) => {
+				resolve(data);
+			});
+		});
+	}
 
-    async validateToken(token: string): Promise<boolean> {
-        let res = await axios.get("https://" + this.host + "/token", { headers: { Authorization: token } }).catch(() => {});
-        if (res?.status == 200) return true;
-        else return false;
-    }
+	createDirectory(path: string): Promise<void> {
+		return new Promise(resolve => {
+			this.socket?.emit("createDirectory", path, () => {
+				resolve();
+			});
+		});
+	}
 
-    private send(obj: {
-        type: "readDirectory" | "stat" | "ping" | "readFile" | "writeFile" | "rename",
-        id: number, data?: any
-    }) {
-        if(this.socket && this.socket.readyState == this.socket.OPEN) {
-            this.socket.send(JSON.stringify(obj));
-        }
-    }
+	stat(path: string): Promise<any> {
+		return new Promise(resolve => {
+			this.socket?.emit("stat", path, (stat: any) => {
+				resolve(stat);
+			});
+		});
+	}
 
-    private await(id: number, callback: (message: any) => any) {
-        this.listeners[id] = callback;
-    }
+	writeFile(path: string, content: number[], options: {
+		create?: boolean, overwrite?: boolean
+	}): Promise<void> {
+		return new Promise(resolve => {
+			this.socket?.send("writeFile", path, content, options, () => {
+				resolve();
+			});
+		});
+	}
 
-    readDirectory(path: string): Promise<[string, number][]> {
-        return new Promise(resolve => {
-            let id = idm.grantID();
-            this.await(id, message => {
-                idm.revokeID(id);
-                console.log(message.data)
-                resolve(message.data);
-            });
-            this.send({ type: "readDirectory", id, data: path });
-        });
-    }
+	readFile(path: string): Promise<number[]|any> {
+		return new Promise(resolve => {
+			this.socket?.emit("readFile", path, (data: number[]|any) => {
+				resolve(data);
+			});
+		});
+	}
 
-    rename(path0: string, path1: string): Promise<any> {
-        return new Promise(resolve => {
-            let id = idm.grantID();
-            this.await(id, message => {
-                idm.revokeID(id);
-                resolve(message.data);
-            });
-            this.send({ type: "rename", id, data: [path0, path1] });
-        });
-    }
+	delete(path: string, options: { recursive: boolean }): Promise<void> {
+		return new Promise(() => {
+			this.socket?.emit("delete", path, options, () => {
+				resolve();
+			});
+		});
+	}
 
-    createDirectory(_path: string): Promise<void> {
-        return new Promise(() => {});
-    }
-
-    stat(path: string): Promise<any> {
-        return new Promise(resolve => {
-            let id = idm.grantID();
-            this.await(id, message => {
-                idm.revokeID(id);
-                resolve(message.data);
-            });
-            this.send({ type: "stat", id, data: path });
-        });
-    }
-
-    writeFile(path: string, content: number[], options: { create?: boolean, overwrite?: boolean }): Promise<void> {
-        return new Promise(resolve => {
-            let id = idm.grantID();
-            this.await(id, message => {
-                idm.revokeID(id);
-                resolve(message.data);
-            });
-            this.send({
-                type: "writeFile", id,
-                data: { path, content, options }
-            });
-        });
-    }
-
-    readFile(path: string): Promise<number[]|any> {
-        return new Promise(resolve => {
-            let id = idm.grantID();
-            this.await(id, message => {
-                idm.revokeID(id);
-                resolve(message.data);
-            });
-            this.send({ type: "readFile", id, data: path });
-        });
-    }
-
-    delete(_path: string, _options: { recursive: boolean }): Promise<void> {
-        return new Promise(() => {});
-    }
-
-    set url(host: string) {
-        this.host = host.replace(/(\/|\\)+$/, "");
-    }
-    set token(auth: string) {
-        this.auth = auth;
-    }
-    get url() {
-        return this.host;
-    }
+	set url(host: string) {
+		this.host = host.replace(/(\/|\\)+$/, "");
+	}
+	get url() {
+		return this.host;
+	}
 
 }
 

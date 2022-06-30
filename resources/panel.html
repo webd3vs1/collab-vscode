@@ -1,0 +1,56 @@
+<body>
+    <style>
+        body {
+            font-family: var(--vscode-font-family);
+            font-size: var(--vscode-font-size);
+            text-align: center;
+        }
+        input {
+            background: var(--vscode-input-background);
+            color: var(--vscode-input-foreground);
+            border: 1px solid var(--vscode-input-border);
+        }
+        input::placeholder {
+            color: var(--vscode-input-placeholderForeground)
+        }
+        #projects {
+            display: flex;
+            width: auto;
+            border-radius: 1rem;
+            padding: .5rem;
+            min-height: 3rem;
+            transform: translateX(-50%);
+            left: 50%;
+            position: relative;
+            margin: 1rem;
+            flex-wrap: wrap;
+            padding-top: 2rem;
+            justify-content: center;
+            background: var(--vscode-textBlockQuote-background);
+            grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+        }
+        #projects > div {
+            width: 16rem;
+            background: #000;
+            margin: .5rem;
+            padding: .5rem;
+            height: 4rem;
+            border-radius: 1rem;
+        }
+        #projects::before {
+            content: "Your projects";
+            width: calc(100% - 8rem);
+            border-bottom: 1px solid white;
+            top: .5rem;
+            left: 4rem;
+            position: absolute;
+            font-size: 1rem;
+        }
+        iframe {
+            display: block;
+            height: 32rem;
+            width: 32rem;
+        }
+    </style>
+    <div id="projects"></div>
+</body>
