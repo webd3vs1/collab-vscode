@@ -5,9 +5,9 @@
     "icon": "resources/icon.png",
     "version": "0.1.0",
     "repository": {
-        "url": "https://github.com/webd3vs1/collab-vscode-extension"
+        "url": "https://github.com/webd3vs1/collab-vscode"
     },
-    "publisher": "ms-az",
+    "publisher": "webd3vs",
     "homepage": "collab.webd3vs.xyz",
     "engines": {
         "vscode": "^1.65.0"
