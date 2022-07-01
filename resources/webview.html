@@ -1,0 +1,333 @@
+<body>
+	<style>
+		html { height: 100%; }
+		body {
+			font-family: var(--vscode-font-family);
+			font-size: 1rem;
+			height: 100%;
+			text-align: center;
+			margin: unset;
+			overflow-x: hidden;
+			padding: unset;
+		}
+		body {
+			--focus: var(--vscode-focusBorder);
+			--focus-border: var(--focus);
+			--bg-primary: var(--vscode-activityBar-background);
+			--bg-secondary: var(--vscode-dropdown-background);
+			--button-color: var(--vscode-button-foreground);
+			--button-hover-bg: var(--vscode-button-hoverBackground);
+			--button-hover-color: var(--button-color);
+			--button-bg: var(--vscode-button-background);
+			--button-border: #0000;
+		}
+
+		body[data-vscode-theme-name="GitHub Dark Default"],
+		body[data-vscode-theme-name="Atom One Dark"],
+		body[data-vscode-theme-name="Dark (Visual Studio)"], 
+		body[data-vscode-theme-name="Dark+ (default dark)"] {
+			--focus-border: #0000;
+		}
+		body[data-vscode-theme-name="GitHub Dark Default"] {
+			--bg-primary: var(--bg-secondary);
+		}
+		body[data-vscode-theme-name="Dark (Visual Studio)"], 
+		body[data-vscode-theme-name="Dark+ (default dark)"] {
+			--bg-secondary: var(--vscode-breadcrumbPicker-background);
+		}
+		body[data-vscode-theme-name="Dark High Contrast"] {
+			--button-border: var(--focus-border);
+		}
+		body[data-vscode-theme-name="Light High Contrast"] {
+			--button-border: var(--focus-border);
+			--button-hover-bg: var(--bg-primary);
+			--button-hover-color: var(--button-bg);
+		}
+
+		/* input {
+			background: var(--vscode-input-background);
+			color: var(--vscode-input-foreground);
+			border: 1px solid var(--vscode-input-border);
+		}
+		input::placeholder {
+			color: var(--vscode-input-placeholderForeground);
+		} */
+		#content {
+			/* padding: .5rem; */
+			display: grid;
+			margin-left: 13rem;
+			position: relative;
+			min-height: calc(100% - 2rem);
+			row-gap: 1rem;
+			grid-template-rows: repeat(auto-fit, auto);
+			padding: 1rem;
+		}
+		.repo {
+			border: 1px solid var(--focus-border);
+			border-radius: 1rem;
+			padding: 1rem;
+			background: var(--bg-secondary);
+			text-align: left;
+			display: grid;
+			grid-template-areas: "avatar name lang" "desc desc desc";
+			grid-template-rows: 2rem auto;
+			grid-template-columns: 2rem auto 2rem;
+		}
+		.repo > .name {
+			grid-area: name;
+			padding: .5rem;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+		}
+		.repo > .name > a {
+			padding: .25rem;
+			cursor: pointer;
+		}
+		.repo > .name > a:hover {
+			text-decoration: underline;
+		}
+		.repo > .lang { grid-area: lang; }
+		.repo > .lang > img {
+			height: 2rem;
+			width: 2rem;
+			-webkit-user-drag: none;
+			user-select: none;
+			border-radius: .25rem;
+		}
+		.repo > img {
+			user-select: none;
+			grid-area: avatar;
+			border-radius: 50%;
+			height: 2rem;
+			width: 2rem;
+			-webkit-user-drag: none;
+		}
+		.repo > .desc { grid-area: desc; }
+		.repo > .desc > .separator { height: .5rem; }
+		
+		.profile {
+			border: 1px solid var(--focus-border);
+			background: var(--bg-secondary);
+			border-radius: 1rem;
+			padding: 1rem;
+			column-gap: 1rem;
+			height: max-content;
+			display: grid;
+			grid-template-columns: 4rem auto;
+			grid-template-areas: "avatar name" "avatar site" "avatar twitter" "bio bio";
+			text-align: left;
+		}
+		.profile > img {
+			grid-area: avatar;
+			border-radius: 50%;
+			user-select: none;
+			-webkit-user-drag: none;
+			height: 4rem;
+			width: 4rem;
+		}
+		.profile > a { text-decoration: none; }
+		.profile > a:hover { text-decoration: underline; }
+		.profile > .bio { grid-area: bio; }
+
+		#sidebar {
+			border: 1px solid var(--focus-border);
+			position: fixed;
+			border-radius: 1rem;
+			width: 12rem;
+			background: var(--bg-primary);
+			height: calc(100% - 2rem);
+			margin: 1rem;
+		}
+		#sidebar > button {
+			border-radius: .5rem;
+			display: block;
+			margin: .5rem;
+			color: var(--button-color);
+			padding: .5rem;
+			background: var(--button-bg);
+			transition: background .2s;
+			border: unset;
+			cursor: pointer;
+			font-family: inherit;
+			font-size: inherit;
+			width: 11rem;
+		}
+		#sidebar > button:disabled {
+			cursor: not-allowed;
+		}
+		#sidebar > button:hover, #sidebar > button.active {
+			background: var(--button-hover-bg);
+			color: var(--button-hover-color);
+		}
+		body.vscode-high-contrast #sidebar > button {
+			border: 2px dashed var(--button-border);
+		}
+		body.vscode-high-contrast #sidebar > button:hover,
+		body.vscode-high-contrast #sidebar > button.active {
+			border: 2px solid var(--button-border);
+		}
+		.preload::after, .preload::before {
+			opacity: 1;
+			content: "";
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			border-radius: 50%;
+			transform: translate(-50%, -50%);
+			border: 2px solid;
+			border-color: var(--focus) transparent transparent transparent;
+			animation: rotate 1s infinite linear;
+			transition: opacity .2s;
+		}
+		.preload.disable::after, .preload.disable::before {
+			opacity: 0;
+		}
+		.preload::after {
+			width: 3rem;
+			height: 3rem;
+		}
+		.preload::before {
+			width: 2.5rem;
+			height: 2.5rem;
+			animation-direction: reverse;
+			animation-duration: .75s;
+		}
+		@keyframes rotate {
+			0% { transform: translate(-50%, -50%) rotate(0deg); }
+			100% { transform: translate(-50%, -50%) rotate(360deg); }
+		}
+
+	</style>
+	<div id="sidebar" class="preload"></div>
+	<div id="content"></div>
+	<script>
+		let $sidebar = document.querySelector("#sidebar");
+		let $content = document.querySelector("#content");
+		let $sidebar_active = null;
+
+		let vscode = acquireVsCodeApi();
+		let url = "";
+
+		addEventListener("message", async e => {
+			let data = e.data;
+			console.log(e);
+			if (data.type == "icons:url") { url = data.url; }
+			if (data.type == "user:profile") {
+				let profile = document.createElement("div");
+				profile.className = "profile";
+				let avatar = new Image();
+				avatar.src = data.avatar;
+				let name = document.createElement("div");
+				name.innerText = data.name;
+				let email = document.createElement("a");
+				email.href = "mailto:" + data.email;
+				email.innerText = data.email;
+				let site = document.createElement("a");
+				site.href = data.site;
+				site.innerText = data.site?.replace(/^https?:\/\//, "");
+				let bio = document.createElement("div");
+				bio.className = "bio";
+				bio.innerText = data.bio;
+				profile.appendChild(avatar);
+				profile.appendChild(name);
+				profile.appendChild(email);
+				profile.appendChild(site);
+				profile.appendChild(bio);
+				$content.appendChild(profile);
+				$content.classList.add("disable");
+				setTimeout(() => { $content.className = ""; }, 200);
+			}
+			if (data.type == "user:data") {
+				$sidebar.innerHTML = "";
+				function click(el, message) {
+					return () => {
+						if ($sidebar_active) {
+							$sidebar_active.classList.remove("active");
+							$sidebar_active.disabled = false;
+						}
+						el.classList.add("active");
+						$sidebar_active = el;
+						el.disabled = true;
+						vscode.postMessage({ type: message });
+						$content.innerHTML = "";
+						$content.className = "preload";
+					}
+				}
+				let user = document.createElement("button");
+				user.className = "user";
+				user.innerText = "Profile";
+				user.onclick = click(user, "user:profile");
+				let repos = document.createElement("button");
+				repos.className = "repos";
+				repos.innerText = "Repositories";
+				repos.onclick = click(repos, "user:repos");
+				let settings = document.createElement("button");
+				settings.className = "settings";
+				settings.innerText = "Settings";
+				$sidebar.appendChild(user);
+				$sidebar.appendChild(repos);
+				$sidebar.appendChild(settings);
+				$sidebar.classList.add("disable");
+				setTimeout(() => { $sidebar.className = ""; }, 200);
+			}
+			if (data.type == "user:repos") {
+				let els = [];
+				$content.classList.add("disable");
+				setTimeout(() => { $content.className = ""; }, 200);
+				data.repos.map(repo => {
+					let el = document.createElement("div");
+					el.className = `repo ${repo.private ? "private" : "public"}`;
+					let avatar = new Image();
+					avatar.src = repo.owner.avatar;
+					let name = document.createElement("div");
+					name.className = "name";
+					let name_owner = document.createElement("a");
+					name_owner.innerText = repo.owner.name;
+					let name_sep = document.createElement("span");
+					name_sep.innerText = "/";
+					let repo_name = document.createElement("a");
+					repo_name.innerText = repo_name.title = repo.name;
+					name.appendChild(name_owner);
+					name.appendChild(name_sep);
+					name.appendChild(repo_name);
+					let desc = document.createElement("div");
+					desc.className = "desc";
+					if (repo.description) {
+						let desc_sep = document.createElement("div");
+						desc_sep.className = "separator";
+						let desc_cnt = document.createElement("div");
+						desc_cnt.innerText = repo.description;
+						desc.appendChild(desc_sep);
+						desc.appendChild(desc_cnt);
+					}
+					let lang = document.createElement("div");
+					lang.className = "lang";
+					lang.innerHTML = `<img src="${icons[repo.lang]}">`;
+					el.appendChild(avatar);
+					el.appendChild(name);
+					el.appendChild(desc);
+					el.appendChild(lang);
+					$content.appendChild(el);
+				});
+			}
+		});
+		let icons = (() => {
+			let f = icon => { return url + "/" + icon + ".svg"; };
+			let nop = () => {}; let handler = {
+				get: (_0, icon) => { switch (icon) {
+					case "JavaScript": return f("js");
+					case "TypeScript": return f("ts");
+					case "HTML": return f("html");
+					case "CSS": return f("css");
+					case "Nix": return f("nix");
+					case "null": return f("null");
+					default: {
+						console.log(`\x1b[31mcollab error:\x1b[37m unknown language: ${icon}`);
+						return f("unknown");
+					};
+				} }
+			}; return new Proxy(nop, handler);
+		})();
+	</script>
+</body>

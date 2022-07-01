@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="grad1" x1="100%" x2="0%" y1="0%" y2="100%">
+      <stop offset="25%" stop-color="#f00" />
+      <stop offset="75%" stop-color="#00f" />
+    </linearGradient>
+    <linearGradient id="grad2" y1="100%" y2="0%">
+      <stop offset="0%" stop-color="#fff" />
+      <stop offset="100%" stop-color="#fff" />
+    </linearGradient>
+  </defs>
+  <polyline points="16,0 30,8 30,24 16,32 2,24 2,8 16,0" fill="url(#grad1)"/>
+  <path d="M17 5l8 8l-8 8l-2-2l6-6l-6-6M15 27l-8-8l8-8l2 2l-6 6l6 6" fill="url(#grad2)" />
+</svg>
