@@ -1,6 +1,4 @@
-import { readFileSync } from "fs";
 import { join } from "path";
-import { io } from "socket.io-client";
 import * as vscode from "vscode";
 import { UserApi } from "./api";
 import { CollabFs } from "./fs";
@@ -51,9 +49,4 @@ async function login(context: vscode.ExtensionContext) {
 			}
 		}));
 	}
-
-	// api.token = session
-
-	// panel.webview.postMessage(session);
-	// context.secrets.store("a", "b");
 }
