@@ -1,5 +1,6 @@
 package-lock.json
 tsconfig.json
+FUNDING.yml
 docs
 src
 .gitignore
